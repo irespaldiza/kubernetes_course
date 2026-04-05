@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: course-info
+  namespace: demo-architecture
+  labels:
+    app.kubernetes.io/part-of: kubernetes-course
+data:
+  module: "1"
+  topic: "architecture-and-declarative-model"
+  owner: "instructor"

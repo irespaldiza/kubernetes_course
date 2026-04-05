@@ -1,0 +1,22 @@
+replicaCount: 1
+
+image:
+  repository: module4/whoami-python
+  tag: local
+  pullPolicy: Never
+
+service:
+  type: ClusterIP
+  port: 8080
+
+message: module-7-helm-demo
+
+initContainer:
+  enabled: false
+  image: busybox:1.36
+  command:
+    - sh
+    - -c
+    - |
+      echo "initialized by helm init container" > /workspace/startup.txt
+      date >> /workspace/startup.txt

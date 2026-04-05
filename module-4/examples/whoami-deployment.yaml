@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: whoami-configured
+  namespace: demo-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: whoami-configured
+  template:
+    metadata:
+      labels:
+        app: whoami-configured
+    spec:
+      containers:
+        - name: whoami
+          image: module4/whoami-python:local
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 8080
+          env:
+            - name: PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: whoami-config
+                  key: PORT
+            - name: MESSAGE
+              valueFrom:
+                configMapKeyRef:
+                  name: whoami-config
+                  key: MESSAGE
+            - name: SECRET_MESSAGE
+              valueFrom:
+                secretKeyRef:
+                  name: whoami-secret
+                  key: SECRET_MESSAGE

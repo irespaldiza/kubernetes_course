@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: logs-demo
+  namespace: demo-app
+  labels:
+    app: logs-demo
+spec:
+  containers:
+    - name: writer
+      image: busybox:1.36
+      command:
+        - sh
+        - -c
+        - while true; do echo "$(date -Iseconds) demo log line"; sleep 5; done

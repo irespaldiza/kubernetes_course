@@ -1,0 +1,65 @@
+services:
+  frontend:
+    image: module0/frontend:local
+    pull_policy: never
+    build:
+      context: ./frontend
+    ports:
+      - "8080:80"
+    depends_on:
+      - catalog-service
+      - orders-service
+    networks:
+      - app-network
+
+  catalog-service:
+    image: module0/catalog-service:local
+    pull_policy: never
+    build:
+      context: ./catalog-service
+    environment:
+      PORT: "8000"
+      DATABASE_URL: "postgresql://app:app@postgres:5432/appdb"
+    depends_on:
+      - postgres
+    networks:
+      - app-network
+
+  orders-service:
+    image: module0/orders-service-java:local
+    pull_policy: never
+    build:
+      context: ./orders-service-java
+    environment:
+      PORT: "8080"
+      DATABASE_URL: "postgres://app:app@postgres:5432/appdb?sslmode=disable"
+      REDIS_ADDR: "redis:6379"
+      CATALOG_URL: "http://catalog-service:8000"
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - app-network
+
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: appdb
+      POSTGRES_USER: app
+      POSTGRES_PASSWORD: app
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./infra/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    networks:
+      - app-network
+
+  redis:
+    image: redis:7-alpine
+    networks:
+      - app-network
+
+volumes:
+  postgres-data:
+
+networks:
+  app-network:

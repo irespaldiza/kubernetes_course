@@ -1,0 +1,67 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "whoami-python.fullname" . }}
+  labels:
+    {{- include "whoami-python.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "whoami-python.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ include "whoami-python.name" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+    spec:
+      {{- if .Values.initContainer.enabled }}
+      initContainers:
+        - name: seed-workspace
+          image: {{ .Values.initContainer.image }}
+          command:
+            {{- toYaml .Values.initContainer.command | nindent 12 }}
+          volumeMounts:
+            - name: workspace
+              mountPath: /workspace
+      {{- end }}
+      containers:
+        - name: whoami-python
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - containerPort: 8080
+          env:
+            - name: PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "whoami-python.fullname" . }}
+                  key: PORT
+            - name: MESSAGE
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "whoami-python.fullname" . }}
+                  key: MESSAGE
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 3
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          {{- if .Values.initContainer.enabled }}
+          volumeMounts:
+            - name: workspace
+              mountPath: /workspace
+          {{- end }}
+      {{- if .Values.initContainer.enabled }}
+      volumes:
+        - name: workspace
+          emptyDir: {}
+      {{- end }}
