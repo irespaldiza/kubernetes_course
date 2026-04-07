@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: catalog-service
+  namespace: demo-app
+  labels:
+    app: catalog-service
+spec:
+  containers:
+    - name: catalog-service
+      image: module0/catalog-service:local
+      imagePullPolicy: Never
+      ports:
+        - containerPort: 8000
+      env:
+        - name: PORT
+          value: "8000"

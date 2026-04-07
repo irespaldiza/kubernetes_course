@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: frontend
+  namespace: demo-app
+  labels:
+    app: frontend
+spec:
+  containers:
+    - name: frontend
+      image: module0/frontend:local
+      imagePullPolicy: Never
+      ports:
+        - containerPort: 80
