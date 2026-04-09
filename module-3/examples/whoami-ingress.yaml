@@ -4,6 +4,7 @@ metadata:
   name: whoami
   namespace: demo-app
 spec:
+  ingressClassName: nginx
   rules:
     - host: whoami.demo.local
       http:
