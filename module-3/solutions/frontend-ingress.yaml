@@ -4,6 +4,7 @@ metadata:
   name: frontend
   namespace: demo-app
 spec:
+  ingressClassName: nginx
   rules:
     - host: frontend.demo.local
       http:
