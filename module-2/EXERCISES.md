@@ -5,7 +5,33 @@
 Goal:
 start one real application component as a Kubernetes pod.
 
-Tasks:
+## Suggested Commands
+
+```bash
+docker build -t module0/catalog-service:local module-0/demo-app/catalog-service
+```
+
+Builds the local image used by the exercise.
+
+```bash
+kubectl apply -f module-1/examples/namespace.yaml
+```
+
+Creates the `demo-app` namespace if it does not exist yet.
+
+```bash
+kubectl apply -f catalog-pod.yaml -n demo-app
+```
+
+Creates the standalone pod from the manifest the student writes.
+
+```bash
+kubectl port-forward -n demo-app pod/catalog-service 8000:8000
+```
+
+Exposes the pod locally so students can call the HTTP endpoints directly.
+
+## Tasks
 
 1. Build `module0/catalog-service:local` if needed.
 2. Create `catalog-pod.yaml`.
@@ -19,7 +45,33 @@ Tasks:
 Goal:
 deploy a second application component as a standalone pod.
 
-Tasks:
+## Suggested Commands
+
+```bash
+docker build -t module0/orders-service-go:local module-0/demo-app/orders-service
+```
+
+Builds the local Go service image.
+
+```bash
+kubectl apply -f orders-pod.yaml -n demo-app
+```
+
+Creates the pod from the manifest the student writes.
+
+```bash
+kubectl describe pod orders-service -n demo-app
+```
+
+Shows the effective container image, ports, events, and environment wiring.
+
+```bash
+kubectl port-forward -n demo-app pod/orders-service 8080:8080
+```
+
+Exposes the pod locally for HTTP testing.
+
+## Tasks
 
 1. Build `module0/orders-service-go:local` if needed.
 2. Create `orders-pod.yaml`.
@@ -33,7 +85,27 @@ Tasks:
 Goal:
 move from single-instance pods to controller-managed workloads.
 
-Tasks:
+## Suggested Commands
+
+```bash
+kubectl apply -f catalog-deployment.yaml -f orders-deployment.yaml -n demo-app
+```
+
+Creates or updates both deployments from the manifests the student writes.
+
+```bash
+kubectl get deployments,pods -n demo-app
+```
+
+Shows the controllers and the pods they created.
+
+```bash
+kubectl scale deployment/catalog-service -n demo-app --replicas=2
+```
+
+Changes the desired state so students can observe replica management.
+
+## Tasks
 
 1. Create `catalog-deployment.yaml`.
 2. Create `orders-deployment.yaml`.
@@ -47,7 +119,21 @@ Tasks:
 Goal:
 practice reading pod status, metadata, and runtime information directly from Kubernetes.
 
-Tasks:
+## Suggested Commands
+
+```bash
+kubectl get pods -n demo-app -o wide
+```
+
+Shows runtime details such as pod IPs and node placement.
+
+```bash
+kubectl describe deployment catalog-service -n demo-app
+```
+
+Shows the desired state, selector, template, and rollout status for the deployment.
+
+## Tasks
 
 1. Run `kubectl get pods -n demo-app -o wide`.
 2. Run `kubectl describe deployment catalog-service -n demo-app`.

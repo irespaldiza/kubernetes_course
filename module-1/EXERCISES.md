@@ -5,7 +5,45 @@
 Goal:
 confirm that Docker Desktop Kubernetes is enabled and that `kubectl` can talk to the local cluster.
 
-Tasks:
+## Suggested Commands
+
+```bash
+kubectl version
+```
+
+Checks that the `kubectl` client is installed and that it can reach the cluster API server.
+
+```bash
+kubectl config get-contexts
+```
+
+Lists the available Kubernetes contexts and marks the active one.
+
+```bash
+kubectl config current-context
+```
+
+Prints the current context that `kubectl` will use for later commands.
+
+```bash
+kubectl cluster-info
+```
+
+Shows the main control plane endpoints exposed by the local cluster.
+
+```bash
+kubectl get nodes
+```
+
+Lists the worker or control-plane nodes currently registered in the cluster.
+
+```bash
+kubectl get namespaces
+```
+
+Lists the namespaces that already exist before any course resources are created.
+
+## Tasks
 
 1. Enable Kubernetes in Docker Desktop.
 2. Wait until the local cluster reports as ready.
@@ -21,7 +59,21 @@ Tasks:
 Goal:
 identify the platform components that already exist before any course workload is deployed.
 
-Tasks:
+## Suggested Commands
+
+```bash
+kubectl get pods -A
+```
+
+Lists pods across all namespaces so students can find system components.
+
+```bash
+kubectl describe pod -n kube-system <pod-name>
+```
+
+Shows detailed runtime information for one selected system pod.
+
+## Tasks
 
 1. Run `kubectl get pods -A`.
 2. Identify the namespace where system components run.
@@ -34,7 +86,21 @@ Tasks:
 Goal:
 understand that Kubernetes is an API platform with many resource types.
 
-Tasks:
+## Suggested Commands
+
+```bash
+kubectl api-resources
+```
+
+Lists the resource kinds exposed by the cluster API.
+
+```bash
+kubectl explain deployment
+```
+
+Shows the schema and field descriptions for the `Deployment` resource.
+
+## Tasks
 
 1. Run `kubectl api-resources`.
 2. Identify which resources are namespaced.

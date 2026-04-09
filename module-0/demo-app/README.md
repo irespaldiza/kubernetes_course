@@ -22,16 +22,78 @@ The course expects these local image tags:
 - `module0/orders-service-java:local`
 - `module0/frontend:local`
 
-## Local Compose Workflows
-
-Run the Go-based stack:
+## Suggested Commands
 
 ```bash
-docker compose -f docker-compose.go.yml up --build
+docker build -t module0/catalog-service:local module-0/demo-app/catalog-service
 ```
 
-Run the Java-based stack:
+Builds the Python catalog service image used by the course manifests.
 
 ```bash
-docker compose -f docker-compose.java.yml up --build
+docker build -t module0/orders-service-go:local module-0/demo-app/orders-service
+```
+
+Builds the Go implementation of the orders service.
+
+```bash
+docker build -t module0/orders-service-java:local module-0/demo-app/orders-service-java
+```
+
+Builds the Java implementation of the same orders service contract.
+
+```bash
+docker build -t module0/frontend:local module-0/demo-app/frontend
+```
+
+Builds the frontend image served by Nginx.
+
+```bash
+docker compose -f module-0/demo-app/docker-compose.go.yml up --build
+```
+
+Builds any missing images and starts the local stack with the Go orders service implementation.
+
+```bash
+docker compose -f module-0/demo-app/docker-compose.java.yml up --build
+```
+
+Builds any missing images and starts the local stack with the Java orders service implementation.
+
+```bash
+docker compose -f module-0/demo-app/docker-compose.go.yml down -v
+```
+
+Stops the Go-based stack and removes the PostgreSQL named volume so the database starts clean on the next run.
+
+```bash
+curl http://127.0.0.1:8080
+```
+
+Checks that the frontend is reachable on the published local port.
+
+```bash
+curl http://127.0.0.1:8080/api/catalog/products
+```
+
+Tests the frontend proxy path for the catalog API.
+
+```bash
+curl http://127.0.0.1:8080/api/orders/orders
+```
+
+Tests the frontend proxy path for the orders API.
+
+## Local Compose Workflows
+
+Use the Go-based stack:
+
+```bash
+docker compose -f module-0/demo-app/docker-compose.go.yml up --build
+```
+
+Use the Java-based stack:
+
+```bash
+docker compose -f module-0/demo-app/docker-compose.java.yml up --build
 ```

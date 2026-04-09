@@ -8,7 +8,21 @@ Keep `examples/` reserved for the published instructor manifests. The reference 
 Goal:
 separate web server configuration from the frontend image.
 
-Tasks:
+## Suggested Commands
+
+```bash
+kubectl create configmap frontend-nginx --from-file=default.conf=module-0/demo-app/frontend/nginx.conf -n demo-app --dry-run=client -o yaml
+```
+
+Generates the `ConfigMap` manifest from the existing Nginx configuration file.
+
+```bash
+kubectl apply -f frontend-deployment.yaml -n demo-app
+```
+
+Applies the updated frontend deployment after the volume mount is added.
+
+## Tasks
 
 1. Read `module-0/demo-app/frontend/nginx.conf`.
 2. Create a `ConfigMap` that contains that Nginx configuration.
@@ -21,7 +35,21 @@ Tasks:
 Goal:
 separate sensitive database data from the manifests and keep it reusable across workloads.
 
-Tasks:
+## Suggested Commands
+
+```bash
+kubectl create secret generic database-secret -n demo-app --from-literal=POSTGRES_DB=appdb --from-literal=POSTGRES_USER=app --from-literal=POSTGRES_PASSWORD=app --from-literal=DATABASE_URL='postgres://app:app@postgres:5432/appdb?sslmode=disable' --dry-run=client -o yaml
+```
+
+Generates a reusable secret manifest with the database credentials and connection string.
+
+```bash
+kubectl apply -f database-secret.yaml -n demo-app
+```
+
+Creates or updates the shared `Secret` in the cluster.
+
+## Tasks
 
 1. Create one shared `Secret` for the database.
 2. Store the database credentials there.
@@ -33,7 +61,27 @@ Tasks:
 Goal:
 connect the shared secret to the workloads that need database access.
 
-Tasks:
+## Suggested Commands
+
+```bash
+kubectl apply -f catalog-service-deployment.yaml -f orders-service-deployment.yaml -n demo-app
+```
+
+Updates both workloads so they consume `DATABASE_URL` from the shared `Secret`.
+
+```bash
+kubectl rollout status deployment/catalog-service -n demo-app
+```
+
+Waits for the `catalog-service` rollout to complete.
+
+```bash
+kubectl rollout status deployment/orders-service -n demo-app
+```
+
+Waits for the `orders-service` rollout to complete.
+
+## Tasks
 
 1. Update `catalog-service` so `DATABASE_URL` comes from `secretKeyRef`.
 2. Update `orders-service` so `DATABASE_URL` comes from the same shared secret.
@@ -45,7 +93,27 @@ Tasks:
 Goal:
 connect secret changes to workload operations.
 
-Tasks:
+## Suggested Commands
+
+```bash
+kubectl apply -f database-secret.yaml -n demo-app
+```
+
+Updates the secret after one of its values changes.
+
+```bash
+kubectl rollout restart deployment/catalog-service -n demo-app
+```
+
+Restarts one affected deployment so new pods read the updated secret values.
+
+```bash
+kubectl rollout restart deployment/orders-service -n demo-app
+```
+
+Restarts the second affected deployment for the same reason.
+
+## Tasks
 
 1. Update one value in the shared database secret.
 2. Apply the change.
