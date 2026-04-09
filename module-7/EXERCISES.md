@@ -1,7 +1,7 @@
 # Module 7 Exercises
 
 Use `examples/helm/whoami-python/` as the reference chart and build the real exercise around `demo-app`.
-The reference answer lives in `solutions/helm/demo-app/`.
+Reference answers live in `solutions/manifests/demo-app/`, `solutions/kustomize/demo-app/`, and `solutions/helm/demo-app/`.
 
 ## 1. Read the Reference Chart
 
@@ -29,10 +29,62 @@ Renders the chart locally so students can inspect the generated Kubernetes manif
 3. Open the templates directory.
 4. Explain the role of each template.
 
-## 2. Create a Chart for `demo-app`
+## 2. Gather the Full Application as Plain Manifests
 
 Goal:
-package the application the students have been building across the course.
+assemble the full application without an additional packaging tool.
+
+## Suggested Commands
+
+```bash
+kubectl apply --dry-run=client -f module-7/solutions/manifests/demo-app/all.yaml
+```
+
+Validates the full manifest bundle locally without creating resources.
+
+```bash
+kubectl apply -f module-7/solutions/manifests/demo-app/all.yaml
+```
+
+Applies the gathered manifest bundle to the cluster.
+
+## Tasks
+
+1. Create one manifest bundle that deploys `frontend`, `catalog-service`, `orders-service`, and `postgres`.
+2. Include the frontend Nginx `ConfigMap`.
+3. Include the shared database `Secret`.
+4. Include the PostgreSQL PVC.
+
+## 3. Package the Same Application with Kustomize
+
+Goal:
+organize the same resources with a lightweight manifest packaging layer.
+
+## Suggested Commands
+
+```bash
+kubectl kustomize module-7/solutions/kustomize/demo-app
+```
+
+Renders the Kustomize output locally for inspection.
+
+```bash
+kubectl apply -k module-7/solutions/kustomize/demo-app
+```
+
+Applies the Kustomize package to the cluster.
+
+## Tasks
+
+1. Create a `kustomization.yaml` that references the full application resources.
+2. Keep the same application components and supporting resources as in the plain-manifest version.
+3. Render the package with `kubectl kustomize`.
+4. Explain what Kustomize improves and what it does not abstract.
+
+## 4. Create a Chart for `demo-app`
+
+Goal:
+package the same application with Helm templates and values.
 
 ## Suggested Commands
 
@@ -55,10 +107,10 @@ Renders the in-progress chart locally to inspect the generated manifests.
 3. Include the frontend Nginx configuration as a templated `ConfigMap`.
 4. Include the shared database `Secret`.
 
-## 3. Add Optional Features to the Chart
+## 5. Compare and Verify the Three Approaches
 
 Goal:
-reuse patterns from the reference chart where they add value.
+compare plain manifests, Kustomize, and Helm using the same application.
 
 ## Suggested Commands
 
@@ -66,27 +118,7 @@ reuse patterns from the reference chart where they add value.
 helm lint ./demo-app
 ```
 
-Checks the chart after helpers, tests, and optional features are added.
-
-```bash
-helm template demo-app ./demo-app
-```
-
-Renders the final chart output for review before installation.
-
-## Tasks
-
-1. Add at least one Helm test.
-2. Add helper templates for names and labels.
-3. Decide whether to include an optional `initContainer` pattern and justify it.
-4. Render the chart with `helm template`.
-
-## 4. Verify the `demo-app` Chart
-
-Goal:
-confirm that the chart is not only syntactically correct but operationally coherent.
-
-## Suggested Commands
+Checks the chart after helpers and values are added.
 
 ```bash
 helm install demo-app ./demo-app -n demo-app-test --create-namespace
@@ -95,20 +127,20 @@ helm install demo-app ./demo-app -n demo-app-test --create-namespace
 Installs the chart into a separate test namespace.
 
 ```bash
-helm test demo-app -n demo-app-test
+kubectl apply -k module-7/solutions/kustomize/demo-app
 ```
 
-Runs the chart test hooks after installation.
+Applies the Kustomize package for side-by-side comparison in the same cluster or another namespace.
 
 ```bash
 helm uninstall demo-app -n demo-app-test
 ```
 
-Removes the test release after verification.
+Removes the Helm test release after verification.
 
 ## Tasks
 
-1. Install the chart in a test namespace.
-2. Run `helm test`.
-3. Confirm that the main services can start with the rendered values.
-4. Compare your chart with `solutions/helm/demo-app/` and identify the main differences.
+1. Render and review the plain manifest bundle.
+2. Render and review the Kustomize package.
+3. Render and review the Helm chart.
+4. Compare your outputs with the three reference solutions and identify the main differences.
