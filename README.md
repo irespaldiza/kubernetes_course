@@ -20,6 +20,7 @@ The repository currently includes material for:
 - `module-2/README.md` to `module-7/README.md`: module guides and teaching notes.
 - `module-0/EXERCISES.md` to `module-7/EXERCISES.md`: student exercise sets.
 - `module-0/demo-app/`: course demo with multiple applications.
+- `currentState/README.md`: ready-to-apply manifests representing the classroom baseline state.
 - `module-1/examples/` to `module-7/examples/`: manifests and delivery examples for each module.
 
 ## Demo Application
