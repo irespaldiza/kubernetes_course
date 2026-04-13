@@ -1,84 +1,44 @@
 # Module 5 Exercises
 
-These exercises focus on persistent storage for the database workload.
-Keep `examples/` for the published instructor example and `solutions/` for the reference answers.
-
-## 1. Attach a PVC to Postgres
+## 1. Create the PostgreSQL StatefulSet
 
 Goal:
-run a database workload with persistent storage.
+create the PostgreSQL `StatefulSet` manifest.
+
+The `Service` already exists.
+Use the existing `postgres` headless service and the existing `postgres-init` `ConfigMap`.
+
+Create `postgres-statefulset.yaml` with:
+
+1. A `StatefulSet` named `postgres` in namespace `demo-app`.
+2. `serviceName: postgres`.
+3. One replica.
+4. `app: postgres` in the selector and pod template labels.
+5. Image `postgres:16-alpine`.
+6. Container port `5432`.
+7. `POSTGRES_DB`, `POSTGRES_USER`, and `POSTGRES_PASSWORD` loaded from `database-secret`.
+8. `PGDATA=/var/lib/postgresql/data/pgdata`.
+9. A volume mount named `postgres-data` at `/var/lib/postgresql/data`.
+10. A volume mount named `postgres-init` at `/docker-entrypoint-initdb.d/init.sql` using `subPath: init.sql` and `readOnly: true`.
+11. A `ConfigMap` volume named `postgres-init` using the existing `postgres-init` resource.
+12. `volumeClaimTemplates` with a claim named `postgres-data`, `ReadWriteOnce`, and `1Gi`.
 
 ## Suggested Commands
 
 ```bash
-kubectl apply -f postgres-init-configmap.yaml -f postgres-pvc.yaml -n demo-app
+kubectl apply -f module-5/solutions/postgres-init-configmap.yaml -f postgres-statefulset.yaml -n demo-app
 ```
 
-Creates the SQL initialization `ConfigMap`, the `PersistentVolumeClaim`, and the PostgreSQL workload.
+Creates the init SQL `ConfigMap` if needed and applies the PostgreSQL `StatefulSet`.
 
 ```bash
-kubectl get pvc,pods -n demo-app
+kubectl get statefulset,pods,pvc -n demo-app -l app=postgres
 ```
 
-Shows whether the claim is bound and whether the database pod is running.
+Shows the `StatefulSet`, the pod `postgres-0`, and the generated PVC.
 
 ```bash
-kubectl exec -n demo-app deploy/postgres -- psql -U app -d appdb -c "SELECT * FROM products;"
+kubectl exec -n demo-app pod/postgres-0 -- psql -U app -d appdb -c "SELECT * FROM products;"
 ```
 
-Connects to the running database and reads the seeded data.
-
-## Tasks
-
-1. Create a `PersistentVolumeClaim` for PostgreSQL data.
-2. Create a PostgreSQL workload that mounts that claim at `/var/lib/postgresql/data`.
-3. Configure the database credentials from the shared `database-secret`.
-4. Apply the manifests.
-5. Connect to the database, create one table, and insert one row.
-6. Restart the workload and confirm the row still exists.
-
-## 2. Read a StatefulSet Manifest
-
-Goal:
-identify the pieces that make stable identity possible.
-
-## Suggested Commands
-
-```bash
-kubectl apply --dry-run=client -f module-5/solutions/postgres-statefulset.yaml
-```
-
-Validates the `StatefulSet` manifest locally without creating resources.
-
-```bash
-kubectl explain statefulset.spec.volumeClaimTemplates
-```
-
-Shows the field used to create one claim per replica.
-
-## Tasks
-
-1. Open `solutions/postgres-statefulset.yaml`.
-2. Identify the headless service.
-3. Identify the `volumeClaimTemplates`.
-4. Explain how pod names are assigned.
-
-## 3. Compare `Deployment` and `StatefulSet` for Postgres
-
-Goal:
-decide which controller fits the database better at this stage of the course.
-
-## Suggested Commands
-
-```bash
-kubectl get deployment,statefulset,svc,pvc -n demo-app
-```
-
-Shows the main controller and storage resources relevant to the comparison.
-
-## Tasks
-
-1. Review your PVC-backed PostgreSQL workload.
-2. Review `solutions/postgres-statefulset.yaml`.
-3. Identify the headless service.
-4. Explain what `StatefulSet` adds beyond the PVC itself.
+Checks that the database started correctly and that the seed data is available.

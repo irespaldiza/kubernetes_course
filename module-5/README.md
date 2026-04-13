@@ -14,6 +14,9 @@ The goal is for students to understand:
 ## Module Assets
 
 - `examples/whoami-emptydir-init-pod.yaml`: instructor example for `emptyDir` plus `initContainer`.
+- `examples/pvc-demo-pod.yaml`: simple PVC example with a pod that writes a file on persistent storage.
+- `examples/configmap-file-volume-pod.yaml`: example of mounting a `ConfigMap` key as a file inside a container.
+- `examples/identity-demo-statefulset.yaml`: instructor example of a simple `StatefulSet` with a headless `Service` and one PVC per replica.
 - `solutions/postgres-pvc.yaml`: reference solution for a PostgreSQL deployment backed by a PVC.
 - `solutions/postgres-statefulset.yaml`: optional reference showing the same database with `StatefulSet`.
 
@@ -35,6 +38,22 @@ Key points:
 - workloads request storage through a `PersistentVolumeClaim`;
 - the cluster binds that request to actual storage;
 - the application should depend on the claim, not on infrastructure details.
+
+Suggested example:
+
+- `examples/pvc-demo-pod.yaml`
+
+### Block 2.5: ConfigMap as a Mounted File
+
+Key points:
+
+- a `ConfigMap` can be projected as files in a volume;
+- each key becomes a file unless `subPath` is used to mount a single file;
+- this is useful for config files consumed from well-known paths.
+
+Suggested example:
+
+- `examples/configmap-file-volume-pod.yaml`
 
 ### Block 3: StatefulSet
 
@@ -71,6 +90,18 @@ Steps:
 3. Identify where Postgres mounts the claim.
 4. Explain why the data outlives the container.
 
+### Demo 2b: Mount a ConfigMap as a File
+
+Goal:
+show how configuration can be exposed as a real file path inside a container.
+
+Steps:
+
+1. Apply `examples/configmap-file-volume-pod.yaml`.
+2. Inspect `/config/app.properties` inside the running pod.
+3. Explain the role of `subPath` in mounting a single key as one file.
+4. Compare this pattern with environment variables.
+
 ### Demo 3: Explain Why a Database Often Uses StatefulSet
 
 Goal:
@@ -78,7 +109,7 @@ connect storage to workload identity.
 
 Steps:
 
-1. Review `solutions/postgres-statefulset.yaml`.
+1. Review `examples/identity-demo-statefulset.yaml`.
 2. Explain stable pod names and headless service usage.
 3. Compare it with a `Deployment`.
 
@@ -87,4 +118,4 @@ Steps:
 - Do not oversell `StatefulSet` as mandatory for every stateful app.
 - Distinguish persistence from backup.
 - If the training cluster uses dynamic provisioning, say that explicitly.
-- Keep the only checked-in instructor example centered on `emptyDir`; leave the persistent database as the exercise solution.
+- Keep the examples small and focused; leave PostgreSQL as the exercise and solution, and use the generic `StatefulSet` example only to explain identity and per-replica storage.
