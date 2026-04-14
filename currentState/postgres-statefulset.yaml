@@ -1,9 +1,10 @@
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
   name: postgres
   namespace: demo-app
 spec:
+  serviceName: postgres
   replicas: 1
   selector:
     matchLabels:
@@ -13,24 +14,9 @@ spec:
       labels:
         app: postgres
     spec:
-      initContainers:
-        - name: prepare-init-script
-          image: alpine:latest
-          command:
-            - sh
-            - -c
-            - cp /config/init.sql /initdb/init.sql
-          volumeMounts:
-            - name: postgres-init-config
-              mountPath: /config
-              readOnly: true
-            - name: postgres-init-workdir
-              mountPath: /initdb
       containers:
         - name: postgres
           image: postgres:16-alpine
-          ports:
-            - containerPort: 5432
           env:
             - name: POSTGRES_DB
               valueFrom:
@@ -49,18 +35,25 @@ spec:
                   key: POSTGRES_PASSWORD
             - name: PGDATA
               value: /var/lib/postgresql/data/pgdata
+          ports:
+            - containerPort: 5432
           volumeMounts:
             - name: postgres-data
               mountPath: /var/lib/postgresql/data
-            - name: postgres-init-workdir
-              mountPath: /docker-entrypoint-initdb.d
+            - name: postgres-init
+              mountPath: /docker-entrypoint-initdb.d/init.sql
+              subPath: init.sql
               readOnly: true
       volumes:
-        - name: postgres-data
-          persistentVolumeClaim:
-            claimName: postgres-data
-        - name: postgres-init-config
+        - name: postgres-init
           configMap:
             name: postgres-init
-        - name: postgres-init-workdir
-          emptyDir: {}
+  volumeClaimTemplates:
+    - metadata:
+        name: postgres-data
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 1Gi

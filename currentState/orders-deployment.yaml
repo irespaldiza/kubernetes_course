@@ -24,3 +24,8 @@ spec:
               value: "8080"
             - name: CATALOG_URL
               value: http://catalog-service:8000
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: database-secret
+                  key: DATABASE_URL

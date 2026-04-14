@@ -6,6 +6,7 @@ These examples cover ephemeral storage, persistent claims, and config-backed fil
 - `pvc-demo-pod.yaml`: `PersistentVolumeClaim` plus a pod that appends lines to a file on mounted storage.
 - `configmap-file-volume-pod.yaml`: `ConfigMap` mounted as a single file inside a container with `subPath`.
 - `identity-demo-statefulset.yaml`: headless `Service` plus a simple `StatefulSet` that writes each pod name into its own persistent volume.
+- `postgres-deployment-init-configmap.yaml`: PostgreSQL `Deployment` with a PVC for data and an `initContainer` that copies `init.sql` from a `ConfigMap` into a shared init directory.
 
 ## Suggested Commands
 
@@ -83,3 +84,22 @@ kubectl exec -n demo-app pod/identity-demo-1 -- cat /data/pod-name.txt
 ```
 
 Confirms that each replica writes its own hostname into its own persistent volume.
+
+```bash
+kubectl apply -f module-5/solutions/postgres-init-configmap.yaml
+kubectl apply -f module-5/examples/postgres-deployment-init-configmap.yaml
+```
+
+Creates the PostgreSQL init `ConfigMap`, the data PVC, and the `Deployment`.
+
+```bash
+kubectl get deploy,pods,pvc -n demo-app -l app=postgres
+```
+
+Shows the PostgreSQL deployment, running pod, and bound PVC.
+
+```bash
+kubectl exec -n demo-app deploy/postgres -- ls -l /docker-entrypoint-initdb.d
+```
+
+Shows the init SQL file prepared by the `initContainer`.

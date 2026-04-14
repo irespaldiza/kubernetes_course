@@ -7,12 +7,15 @@ It is intended as a quick recovery point for students so they can continue from 
 ## Included Resources
 
 - `namespace.yaml`
-- `postgres-deployment.yaml`
+- `database-secret.yaml`
+- `postgres-init-configmap.yaml`
+- `postgres-statefulset.yaml`
 - `postgres-service.yaml`
 - `catalog-deployment.yaml`
 - `catalog-service.yaml`
 - `orders-deployment.yaml`
 - `orders-service.yaml`
+- `frontend-nginx-configmap.yaml`
 - `frontend-deployment.yaml`
 - `frontend-service.yaml`
 - `frontend-ingress.yaml`
@@ -27,7 +30,9 @@ Apply the manifests in a predictable order:
 
 ```bash
 kubectl apply -f currentState/namespace.yaml
-kubectl apply -f currentState/postgres-deployment.yaml -f currentState/postgres-service.yaml
+kubectl delete deployment postgres -n demo-app --ignore-not-found
+kubectl apply -f currentState/database-secret.yaml -f currentState/postgres-init-configmap.yaml -f currentState/frontend-nginx-configmap.yaml
+kubectl apply -f currentState/postgres-service.yaml -f currentState/postgres-statefulset.yaml
 kubectl apply -f currentState/catalog-deployment.yaml -f currentState/catalog-service.yaml
 kubectl apply -f currentState/orders-deployment.yaml -f currentState/orders-service.yaml
 kubectl apply -f currentState/frontend-deployment.yaml -f currentState/frontend-service.yaml -f currentState/frontend-ingress.yaml

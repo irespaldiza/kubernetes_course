@@ -4,6 +4,7 @@ metadata:
   name: postgres
   namespace: demo-app
 spec:
+  clusterIP: None
   selector:
     app: postgres
   ports:
