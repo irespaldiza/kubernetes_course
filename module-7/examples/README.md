@@ -1,42 +1,57 @@
 # Module 7 Examples
 
-These examples focus on Helm packaging for the Module 4 `whoami-python` application.
-The full `demo-app` reference now also exists in `solutions/manifests/demo-app/`, `solutions/kustomize/demo-app/`, and `solutions/helm/demo-app/`.
+These are instructor examples used to explain packaging approaches before or alongside the Helm exercises.
 
-- `helm/whoami-python/`: Helm chart for `whoami-python`, including a Helm test and optional init container.
+- `kustomize/whoami-python/`: small Kustomize example with a base plus `dev` and `prod` overlays focused on simple transformations.
+- `helm/whoami-python/`: small Helm chart used to explain chart structure.
+- `helm/external-charts/grafana-values.yaml`: example values file for consuming the Grafana chart.
 - `kompose/`: read-only example of converting `docker-compose.go.yml` into Kubernetes manifests with Kompose.
 
+WordPress is not listed here because it is treated as a student exercise in `../EXERCISES.md`.
+
+The full `demo-app` reference still exists in:
+
+- `../solutions/manifests/demo-app/`
+- `../solutions/kustomize/demo-app/`
+- `../solutions/helm/demo-app/`
+
 ## Suggested Commands
+
+```bash
+kubectl kustomize module-7/examples/kustomize/whoami-python/base
+```
+
+Renders the plain base manifests with no environment-specific changes.
+
+```bash
+kubectl kustomize module-7/examples/kustomize/whoami-python/overlays/dev
+```
+
+Renders the Kustomize overlay locally.
+
+```bash
+kubectl kustomize module-7/examples/kustomize/whoami-python/overlays/prod
+```
+
+Renders the production overlay locally for comparison with `dev`.
 
 ```bash
 helm lint module-7/examples/helm/whoami-python
 ```
 
-Checks the chart structure and basic template validity.
+Checks the reference chart structure and basic template validity.
 
 ```bash
 helm template whoami-python module-7/examples/helm/whoami-python
 ```
 
-Renders the chart locally without sending anything to the cluster.
+Renders the reference chart locally without sending anything to the cluster.
 
 ```bash
-helm install whoami-python module-7/examples/helm/whoami-python -n demo-app --create-namespace
+helm template grafana grafana/grafana -n observability -f module-7/examples/helm/external-charts/grafana-values.yaml
 ```
 
-Installs the chart into the `demo-app` namespace and creates the namespace if it does not exist yet.
-
-```bash
-helm test whoami-python -n demo-app
-```
-
-Runs the chart test pod declared in the Helm templates.
-
-```bash
-kubectl kustomize module-7/solutions/kustomize/demo-app
-```
-
-Renders the Kustomize version of the full `demo-app` package.
+Renders the Grafana chart for the observability discussion.
 
 ```bash
 kubectl apply -f module-7/solutions/manifests/demo-app/all.yaml

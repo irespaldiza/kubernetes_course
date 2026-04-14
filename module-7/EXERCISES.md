@@ -1,90 +1,95 @@
 # Module 7 Exercises
 
-Use `examples/helm/whoami-python/` as the reference chart and build the real exercise around `demo-app`.
-Reference answers live in `solutions/manifests/demo-app/`, `solutions/kustomize/demo-app/`, and `solutions/helm/demo-app/`.
+This module has three student exercises, all focused on Helm.
 
-## 1. Read the Reference Chart
+Kustomize, Grafana, and Kompose are examples for class explanation and comparison.
+
+Reference answers live in `solutions/helm/external-charts/` and `solutions/helm/demo-app/`.
+
+## 1. Install Helm
 
 Goal:
-understand the Helm patterns before applying them to the course application.
+prepare the local environment and confirm the Helm client is ready.
 
 ## Suggested Commands
 
 ```bash
-helm lint module-7/examples/helm/whoami-python
+helm version
 ```
 
-Validates the example chart structure and common template issues.
+Shows whether Helm is installed and prints the client version.
 
 ```bash
-helm template whoami-python module-7/examples/helm/whoami-python
+helm repo list
 ```
 
-Renders the chart locally so students can inspect the generated Kubernetes manifests.
+Confirms the client is available and shows the currently configured repositories.
 
 ## Tasks
 
-1. Open `examples/helm/whoami-python/Chart.yaml`.
-2. Open `examples/helm/whoami-python/values.yaml`.
-3. Open the templates directory.
-4. Explain the role of each template.
+1. Install Helm on your machine.
+2. Run `helm version`.
+3. Explain what Helm is used for in Kubernetes.
 
-## 2. Gather the Full Application as Plain Manifests
+## 2. Deploy the WordPress Chart
 
 Goal:
-assemble the full application without an additional packaging tool.
+learn the first practical Helm workflow without writing templates, first with `--set` and then with a custom config file.
 
 ## Suggested Commands
 
 ```bash
-kubectl apply --dry-run=client -f module-7/solutions/manifests/demo-app/all.yaml
+helm repo add bitnami https://charts.bitnami.com/bitnami
 ```
 
-Validates the full manifest bundle locally without creating resources.
+Adds the chart repository used in the exercise.
 
 ```bash
-kubectl apply -f module-7/solutions/manifests/demo-app/all.yaml
+helm repo update
 ```
 
-Applies the gathered manifest bundle to the cluster.
+Refreshes repository metadata before rendering or installing the chart.
+
+```bash
+helm show values bitnami/wordpress
+```
+
+Shows the upstream chart defaults so students can discover which values to override.
+
+```bash
+helm template blog bitnami/wordpress --set service.type=ClusterIP
+```
+
+Renders the chart locally with a quick one-off override from the command line.
+
+```bash
+helm template blog bitnami/wordpress -f ./config.yaml
+```
+
+Renders the chart locally using the student config file.
+
+```bash
+helm install blog bitnami/wordpress -n blog --create-namespace -f ./config.yaml
+```
+
+Installs the chart into a dedicated namespace using the same config file.
 
 ## Tasks
 
-1. Create one manifest bundle that deploys `frontend`, `catalog-service`, `orders-service`, and `postgres`.
-2. Include the frontend Nginx `ConfigMap`.
-3. Include the shared database `Secret`.
-4. Include the PostgreSQL PVC.
+1. Run `helm show values bitnami/wordpress` and identify which keys must be overridden.
+2. Render the chart once with a simple `--set` override to confirm that Helm can change values from the command line.
+3. Create a file named `config.yaml`.
+4. In `config.yaml`, set a blog name, admin user, and email.
+5. In `config.yaml`, keep the service internal with `ClusterIP`.
+6. In `config.yaml`, enable persistence for both WordPress and MariaDB.
+7. Add at least one extra change that is not shown in class, so you have to inspect the chart values yourself.
+8. Render the chart locally with `helm template`.
+9. Deploy the chart into the cluster.
 
-## 3. Package the Same Application with Kustomize
-
-Goal:
-organize the same resources with a lightweight manifest packaging layer.
-
-## Suggested Commands
-
-```bash
-kubectl kustomize module-7/solutions/kustomize/demo-app
-```
-
-Renders the Kustomize output locally for inspection.
-
-```bash
-kubectl apply -k module-7/solutions/kustomize/demo-app
-```
-
-Applies the Kustomize package to the cluster.
-
-## Tasks
-
-1. Create a `kustomization.yaml` that references the full application resources.
-2. Keep the same application components and supporting resources as in the plain-manifest version.
-3. Render the package with `kubectl kustomize`.
-4. Explain what Kustomize improves and what it does not abstract.
-
-## 4. Create a Chart for `demo-app`
+## 3. Create a Chart for `demo-app`
 
 Goal:
-package the same application with Helm templates and values.
+package the course application with Helm templates and values.
 
 ## Suggested Commands
 
@@ -100,47 +105,17 @@ helm template demo-app ./demo-app
 
 Renders the in-progress chart locally to inspect the generated manifests.
 
+```bash
+helm lint ./demo-app
+```
+
+Checks the chart structure and common template issues.
+
 ## Tasks
 
 1. Create a chart that deploys `frontend`, `catalog-service`, `orders-service`, and `postgres`.
 2. Move image names, tags, replica counts, ports, and database values into `values.yaml`.
 3. Include the frontend Nginx configuration as a templated `ConfigMap`.
 4. Include the shared database `Secret`.
-
-## 5. Compare and Verify the Three Approaches
-
-Goal:
-compare plain manifests, Kustomize, and Helm using the same application.
-
-## Suggested Commands
-
-```bash
-helm lint ./demo-app
-```
-
-Checks the chart after helpers and values are added.
-
-```bash
-helm install demo-app ./demo-app -n demo-app-test --create-namespace
-```
-
-Installs the chart into a separate test namespace.
-
-```bash
-kubectl apply -k module-7/solutions/kustomize/demo-app
-```
-
-Applies the Kustomize package for side-by-side comparison in the same cluster or another namespace.
-
-```bash
-helm uninstall demo-app -n demo-app-test
-```
-
-Removes the Helm test release after verification.
-
-## Tasks
-
-1. Render and review the plain manifest bundle.
-2. Render and review the Kustomize package.
-3. Render and review the Helm chart.
-4. Compare your outputs with the three reference solutions and identify the main differences.
+5. Render the chart locally and review the generated manifests.
+6. Explain which parts are easier with Helm than with plain manifests or Kustomize.
