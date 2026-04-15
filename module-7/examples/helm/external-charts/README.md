@@ -27,10 +27,16 @@ helm template blog bitnami/wordpress --set service.type=ClusterIP
 Renders the WordPress chart locally with a quick CLI override.
 
 ```bash
-helm template blog bitnami/wordpress -f ./config.yaml
+export WP_PASSWORD='student123'
+export DB_PASSWORD='dbpass123'
+export DB_ROOT_PASSWORD='rootpass123'
+helm template blog bitnami/wordpress -f ./config.yaml \
+  --set wordpressPassword="$WP_PASSWORD" \
+  --set mariadb.auth.password="$DB_PASSWORD" \
+  --set mariadb.auth.rootPassword="$DB_ROOT_PASSWORD"
 ```
 
-Renders the WordPress chart locally with the student's config file.
+Renders the WordPress chart locally with the student's `config.yaml` plus passwords passed with `--set`.
 
 ```bash
 helm template grafana grafana/grafana -n observability --set adminPassword='grafana123'
@@ -45,10 +51,16 @@ helm template grafana grafana/grafana -n observability -f module-7/examples/helm
 Renders the Grafana chart locally with the example values plus a one-off CLI override.
 
 ```bash
-helm install blog bitnami/wordpress -n blog --create-namespace -f ./config.yaml
+export WP_PASSWORD='student123'
+export DB_PASSWORD='dbpass123'
+export DB_ROOT_PASSWORD='rootpass123'
+helm install blog bitnami/wordpress -n blog --create-namespace -f ./config.yaml \
+  --set wordpressPassword="$WP_PASSWORD" \
+  --set mariadb.auth.password="$DB_PASSWORD" \
+  --set mariadb.auth.rootPassword="$DB_ROOT_PASSWORD"
 ```
 
-Installs WordPress into a dedicated namespace for the exercise.
+Installs WordPress into a dedicated namespace for the exercise, keeping normal settings in `config.yaml` and passwords in `--set`.
 
 ```bash
 helm install grafana grafana/grafana -n observability --create-namespace -f module-7/examples/helm/external-charts/grafana-values.yaml --set adminPassword='grafana123'

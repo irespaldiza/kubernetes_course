@@ -82,16 +82,28 @@ helm template blog bitnami/wordpress --set service.type=ClusterIP
 Renders the chart locally with a quick one-off override from the command line.
 
 ```bash
-helm template blog bitnami/wordpress -f ./config.yaml
+export WP_PASSWORD='student123'
+export DB_PASSWORD='dbpass123'
+export DB_ROOT_PASSWORD='rootpass123'
+helm template blog bitnami/wordpress -f ./config.yaml \
+  --set wordpressPassword="$WP_PASSWORD" \
+  --set mariadb.auth.password="$DB_PASSWORD" \
+  --set mariadb.auth.rootPassword="$DB_ROOT_PASSWORD"
 ```
 
-Renders the chart locally using the student config file.
+Renders the chart locally using the student config file plus the passwords passed from the command line.
 
 ```bash
-helm install blog bitnami/wordpress -n blog --create-namespace -f ./config.yaml
+export WP_PASSWORD='student123'
+export DB_PASSWORD='dbpass123'
+export DB_ROOT_PASSWORD='rootpass123'
+helm install blog bitnami/wordpress -n blog --create-namespace -f ./config.yaml \
+  --set wordpressPassword="$WP_PASSWORD" \
+  --set mariadb.auth.password="$DB_PASSWORD" \
+  --set mariadb.auth.rootPassword="$DB_ROOT_PASSWORD"
 ```
 
-Installs the chart into a dedicated namespace using the same config file.
+Installs the chart into a dedicated namespace using the same config file and runtime passwords.
 
 ## Tasks
 
@@ -102,9 +114,10 @@ Installs the chart into a dedicated namespace using the same config file.
 5. In `config.yaml`, set a blog name, admin user, and email.
 6. In `config.yaml`, keep the service internal with `ClusterIP`.
 7. In `config.yaml`, enable persistence for both WordPress and MariaDB.
-8. Add at least one extra change that is not shown in class, so you have to inspect the chart values yourself.
-9. Render the chart locally with `helm template`.
-10. Deploy the chart into the cluster.
+8. Pass the WordPress admin password, MariaDB password, and MariaDB root password with `--set`, not inside `config.yaml`.
+9. Add at least one extra non-sensitive change that is not shown in class, so you have to inspect the chart values yourself.
+10. Render the chart locally with `helm template` so the result already reflects both the `config.yaml` values and the passwords passed with `--set`.
+11. Deploy the chart into the cluster with the same split: file for normal settings, `--set` for passwords.
 
 ## 3. Create a Chart for `demo-app`
 
@@ -140,23 +153,33 @@ Checks the chart structure and common template issues.
 1. Copy `module-7/examples/helm/demo-app-starter/` into your workspace as the starting point for the exercise.
 2. Use that starter chart to deploy `frontend`, `catalog-service`, `orders-service`, and `postgres`.
 3. Move the basic configuration into `values.yaml` instead of leaving it hardcoded in the templates.
-4. At minimum, make image names and tags configurable.
-5. At minimum, make replica counts configurable.
-6. At minimum, make service ports and container ports configurable.
-7. At minimum, make database secret values configurable.
-8. At minimum, make the frontend Nginx `ConfigMap` configurable.
-9. At minimum, make the Postgres init SQL `ConfigMap` configurable.
-10. At minimum, make the Postgres persistence size configurable.
-11. Keep the chart intentionally simple. You do not need to add advanced helpers, conditionals, autoscaling, probes, or chart dependencies.
-12. Render the chart locally and review the generated manifests.
-13. Explain which parts are easier with Helm than with plain manifests or Kustomize.
+4. Make all resource names depend on the Helm release name so the rendered resources look like `release-name-resource-name`.
+5. Update internal references so services, deployments, the ingress backend, and the database secret still point to the correct rendered names.
+6. Do not hardcode the namespace in the templates; use the release namespace.
+7. Make image repositories, tags, and pull policies configurable.
+8. Make replica counts configurable.
+9. Make service ports and container ports configurable.
+10. Make the database secret values configurable.
+11. Keep the frontend Nginx `ConfigMap` and the Postgres init SQL `ConfigMap` as provided in the starter chart.
+12. Make the Postgres persistence size configurable.
+13. Make the frontend ingress optional with `ingress.enabled`.
+14. Make the ingress host configurable.
+15. Make the ingress class name configurable.
+16. Keep the chart intentionally simple. You do not need to add advanced helpers, autoscaling, probes, or chart dependencies.
+17. Render the chart locally and review the generated manifests.
+18. Explain which parts are easier with Helm than with plain manifests or Kustomize.
 
 Recommended implementation order:
 
-1. Replace one replica count with a value from `values.yaml`.
-2. Replace one image string with a value from `values.yaml`.
-3. Replace one port with a value from `values.yaml`.
-4. Repeat the same pattern for the other services.
-5. Move the database secret values into `values.yaml`.
-6. Move the Nginx config into `values.yaml`.
-7. Move the Postgres init SQL into `values.yaml`.
+1. Render the starter chart once with `helm template` and identify what is hardcoded.
+2. Replace one easy value such as a replica count with a value from `values.yaml`.
+3. Replace one image string with a value from `values.yaml`.
+4. Replace one port with a value from `values.yaml`.
+5. Repeat the same pattern for the other workloads and services until the main image, replica, and port values are configurable.
+6. Change resource names so they depend on the release name, then fix every internal reference that breaks because of the new names.
+7. Remove hardcoded namespaces from templates and use the release namespace.
+8. Move the database secret values into `values.yaml`.
+9. Move the Postgres persistence size into `values.yaml`.
+10. Make the ingress optional with `ingress.enabled`.
+11. Add `ingress.host` and `ingress.className` values and wire them into the ingress template.
+12. Render again and verify that the chart still produces a complete application with the new naming and ingress settings.

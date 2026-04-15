@@ -1,5 +1,114 @@
-# Intentionally small starter file.
-# Students should move configurable data out of templates into this file during the exercise.
+# Starter values file for the Module 7 demo-app Helm exercise.
+# The templates are still intentionally close to the plain manifests.
+# Students should progressively wire these values into the templates.
 
 nameOverride: ""
 fullnameOverride: ""
+
+frontend:
+  replicaCount: 1
+  image:
+    repository: module0/frontend
+    tag: local
+    pullPolicy: Never
+  service:
+    type: ClusterIP
+    port: 80
+  containerPort: 80
+
+catalogService:
+  replicaCount: 1
+  image:
+    repository: module0/catalog-service
+    tag: local
+    pullPolicy: Never
+  service:
+    type: ClusterIP
+    port: 8000
+  containerPort: 8000
+
+ordersService:
+  replicaCount: 1
+  image:
+    repository: module0/orders-service-go
+    tag: local
+    pullPolicy: Never
+  service:
+    type: ClusterIP
+    port: 8080
+  containerPort: 8080
+
+postgres:
+  replicaCount: 1
+  image:
+    repository: postgres
+    tag: 16-alpine
+    pullPolicy: IfNotPresent
+  service:
+    port: 5432
+  containerPort: 5432
+  persistence:
+    size: 1Gi
+
+database:
+  name: appdb
+  user: app
+  password: app
+  databaseUrl: postgres://app:app@postgres:5432/appdb?sslmode=disable
+
+ingress:
+  enabled: true
+  className: nginx
+  host: frontend.demo.local
+
+frontendNginxConfig: |
+  server {
+    listen 80;
+    server_name _;
+
+    root /usr/share/nginx/html;
+    index index.html;
+
+    location / {
+      try_files $uri /index.html;
+    }
+
+    location /api/catalog/ {
+      proxy_pass http://catalog-service:8000/;
+      proxy_http_version 1.1;
+      proxy_set_header Host $host;
+      proxy_set_header X-Real-IP $remote_addr;
+      proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+      proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    location /api/orders/ {
+      proxy_pass http://orders-service:8080/;
+      proxy_http_version 1.1;
+      proxy_set_header Host $host;
+      proxy_set_header X-Real-IP $remote_addr;
+      proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+      proxy_set_header X-Forwarded-Proto $scheme;
+    }
+  }
+
+postgresInitSql: |
+  CREATE TABLE IF NOT EXISTS products (
+    id SERIAL PRIMARY KEY,
+    name TEXT NOT NULL,
+    price NUMERIC(10,2) NOT NULL
+  );
+
+  CREATE TABLE IF NOT EXISTS orders (
+    id SERIAL PRIMARY KEY,
+    product_id INTEGER NOT NULL,
+    customer TEXT NOT NULL,
+    status TEXT NOT NULL DEFAULT 'created'
+  );
+
+  INSERT INTO products (name, price)
+  VALUES
+    ('Kubernetes Mug', 12.50),
+    ('Docker Sticker Pack', 4.00),
+    ('Cloud Native T-Shirt', 19.90)
+  ON CONFLICT DO NOTHING;
