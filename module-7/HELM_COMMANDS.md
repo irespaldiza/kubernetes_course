@@ -43,6 +43,12 @@ helm show values bitnami/wordpress
 Displays the default values of a chart.
 
 ```bash
+helm show values bitnami/wordpress > values.yaml
+```
+
+Exports the default chart values into a local file so you can search which keys should go into your own override file.
+
+```bash
 helm show chart bitnami/wordpress
 ```
 

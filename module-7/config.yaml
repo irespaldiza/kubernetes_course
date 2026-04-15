@@ -1,0 +1,10 @@
+service:
+  type: ClusterIP
+
+wordpressBlogName: Kubernetes Course Blog
+
+ingress:
+  enabled: true
+  ingressClassName: nginx
+  hostnames:
+    - wordpress2.local

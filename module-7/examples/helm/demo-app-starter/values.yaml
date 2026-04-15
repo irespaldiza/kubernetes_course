@@ -1,0 +1,5 @@
+# Intentionally small starter file.
+# Students should move configurable data out of templates into this file during the exercise.
+
+nameOverride: ""
+fullnameOverride: ""

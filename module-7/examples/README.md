@@ -4,6 +4,7 @@ These are instructor examples used to explain packaging approaches before or alo
 
 - `kustomize/whoami-python/`: small Kustomize example with a base plus `dev` and `prod` overlays focused on simple transformations.
 - `helm/whoami-python/`: small Helm chart used to explain chart structure.
+- `helm/demo-app-starter/`: shared starting chart for the `demo-app` exercise, close to the plain manifests in `currentState/`.
 - `helm/external-charts/grafana-values.yaml`: example values file for consuming the Grafana chart.
 - `kompose/`: read-only example of converting `docker-compose.go.yml` into Kubernetes manifests with Kompose.
 

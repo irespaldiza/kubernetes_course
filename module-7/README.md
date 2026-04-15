@@ -19,6 +19,7 @@ Examples:
 
 - `examples/kustomize/whoami-python/`: small Kustomize example with a base plus `dev` and `prod` overlays focused on simple transformations.
 - `examples/helm/whoami-python/`: instructor reference chart for `whoami-python`, including a test and optional init container support.
+- `examples/helm/demo-app-starter/`: shared starter chart for the `demo-app` exercise, intentionally close to the plain manifests.
 - `examples/helm/external-charts/grafana-values.yaml`: example values file for consuming the Grafana chart.
 - `examples/kompose/`: read-only example output from `kompose convert` using the course Compose file.
 
@@ -32,11 +33,12 @@ Reference solutions:
 - `solutions/kustomize/demo-app/`: reference Kustomize packaging for the same application.
 - `solutions/helm/external-charts/wordpress-values.yaml`: reference values for the WordPress exercise, with credentials passed in the command.
 - `solutions/helm/demo-app/`: reference chart for the course demo application.
+- `solutions/helm/demo-app-bitnami-postgresql/`: alternative reference chart using Bitnami PostgreSQL as a dependency.
 
 Support material:
 
 - `HELM_COMMANDS.md`: common Helm commands used in the module.
-- `HELM_GO_TEMPLATE.md`: short guide to Go template usage in Helm charts.
+- `HELM_GO_TEMPLATE.md`: step-by-step student guide for turning plain YAML into simple Helm templates.
 
 ## Recommended Teaching Narrative
 
@@ -153,7 +155,19 @@ Steps:
 3. Open the templates directory.
 4. Identify helpers, config, workload, service, and test resources.
 
-### Example 6: Read a Kompose Conversion
+### Example 6: Inspect the `demo-app` Helm Starter
+
+Goal:
+show the common starting point used later in the Helm exercise.
+
+Steps:
+
+1. Open `examples/helm/demo-app-starter/Chart.yaml`.
+2. Open `examples/helm/demo-app-starter/templates/`.
+3. Compare one or two templates with the plain manifests in `../currentState/`.
+4. Explain that the exercise starts from shared templates and then moves repeated values into `values.yaml`.
+
+### Example 7: Read a Kompose Conversion
 
 Goal:
 show what an automatic Compose-to-Kubernetes translation looks like before manual refinement.

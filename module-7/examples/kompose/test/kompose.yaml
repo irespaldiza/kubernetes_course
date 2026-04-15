@@ -1,0 +1,226 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    kompose.cmd: kompose convert -f docker-compose.yml -o test/kompose.yaml
+    kompose.version: 1.37.0 (HEAD)
+  labels:
+    io.kompose.service: frontend
+  name: frontend
+spec:
+  ports:
+    - name: "8080"
+      port: 8080
+      targetPort: 80
+  selector:
+    io.kompose.service: frontend
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose convert -f docker-compose.yml -o test/kompose.yaml
+    kompose.version: 1.37.0 (HEAD)
+  labels:
+    io.kompose.service: catalog-service
+  name: catalog-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: catalog-service
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose convert -f docker-compose.yml -o test/kompose.yaml
+        kompose.version: 1.37.0 (HEAD)
+      labels:
+        io.kompose.service: catalog-service
+    spec:
+      containers:
+        - env:
+            - name: DATABASE_URL
+              value: postgresql://app:app@postgres:5432/appdb
+            - name: PORT
+              value: "8000"
+          image: module0/catalog-service:local
+          name: catalog-service
+      restartPolicy: Always
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose convert -f docker-compose.yml -o test/kompose.yaml
+    kompose.version: 1.37.0 (HEAD)
+  labels:
+    io.kompose.service: frontend
+  name: frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: frontend
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose convert -f docker-compose.yml -o test/kompose.yaml
+        kompose.version: 1.37.0 (HEAD)
+      labels:
+        io.kompose.service: frontend
+    spec:
+      containers:
+        - image: module0/frontend:local
+          name: frontend
+          ports:
+            - containerPort: 80
+              protocol: TCP
+      restartPolicy: Always
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose convert -f docker-compose.yml -o test/kompose.yaml
+    kompose.version: 1.37.0 (HEAD)
+  labels:
+    io.kompose.service: orders-service
+  name: orders-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: orders-service
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose convert -f docker-compose.yml -o test/kompose.yaml
+        kompose.version: 1.37.0 (HEAD)
+      labels:
+        io.kompose.service: orders-service
+    spec:
+      containers:
+        - env:
+            - name: CATALOG_URL
+              value: http://catalog-service:8000
+            - name: DATABASE_URL
+              value: postgres://app:app@postgres:5432/appdb?sslmode=disable
+            - name: PORT
+              value: "8080"
+            - name: REDIS_ADDR
+              value: redis:6379
+          image: module0/orders-service-go:local
+          name: orders-service
+      restartPolicy: Always
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose convert -f docker-compose.yml -o test/kompose.yaml
+    kompose.version: 1.37.0 (HEAD)
+  labels:
+    io.kompose.service: postgres
+  name: postgres
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: postgres
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose convert -f docker-compose.yml -o test/kompose.yaml
+        kompose.version: 1.37.0 (HEAD)
+      labels:
+        io.kompose.service: postgres
+    spec:
+      containers:
+        - env:
+            - name: POSTGRES_DB
+              value: appdb
+            - name: POSTGRES_PASSWORD
+              value: app
+            - name: POSTGRES_USER
+              value: app
+          image: postgres:16-alpine
+          name: postgres
+          volumeMounts:
+            - mountPath: /var/lib/postgresql/data
+              name: postgres-data
+            - mountPath: /docker-entrypoint-initdb.d/init.sql
+              name: postgres-claim1
+              readOnly: true
+      restartPolicy: Always
+      volumes:
+        - name: postgres-data
+          persistentVolumeClaim:
+            claimName: postgres-data
+        - name: postgres-claim1
+          persistentVolumeClaim:
+            claimName: postgres-claim1
+            readOnly: true
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  labels:
+    io.kompose.service: postgres-data
+  name: postgres-data
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 100Mi
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  labels:
+    io.kompose.service: postgres-claim1
+  name: postgres-claim1
+spec:
+  accessModes:
+    - ReadOnlyMany
+  resources:
+    requests:
+      storage: 100Mi
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose convert -f docker-compose.yml -o test/kompose.yaml
+    kompose.version: 1.37.0 (HEAD)
+  labels:
+    io.kompose.service: redis
+  name: redis
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: redis
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose convert -f docker-compose.yml -o test/kompose.yaml
+        kompose.version: 1.37.0 (HEAD)
+      labels:
+        io.kompose.service: redis
+    spec:
+      containers:
+        - image: redis:7-alpine
+          name: redis
+      restartPolicy: Always
+
