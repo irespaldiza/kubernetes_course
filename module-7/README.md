@@ -17,6 +17,7 @@ The goal is for students to understand:
 
 Examples:
 
+- `examples/argocd/`: Argo CD `Application` and `ApplicationSet` examples that deploy the Kustomize and Helm assets from this module through GitOps.
 - `examples/kustomize/whoami-python/`: small Kustomize example with a base plus `dev` and `prod` overlays focused on simple transformations.
 - `examples/helm/whoami-python/`: instructor reference chart for `whoami-python`, including a test and optional init container support.
 - `examples/helm/demo-app-starter/`: shared starter chart for the `demo-app` exercise, intentionally close to the plain manifests.
@@ -179,6 +180,26 @@ Steps:
 3. Identify the generated `Deployment`, `Service`, and `PersistentVolumeClaim` objects.
 4. Explain what still needs manual design work after the conversion.
 
+### Example 8: Reconcile the Same Repo with Argo CD
+
+Goal:
+show that Helm and Kustomize are packaging approaches, while Argo CD is the GitOps delivery and reconciliation layer.
+
+Steps:
+
+1. Review `examples/argocd/README.md`.
+2. Install Argo CD in the `argocd` namespace.
+3. Open `examples/argocd/whoami-kustomize-dev.yaml`.
+4. Open `examples/argocd/whoami-helm.yaml`.
+5. Open `examples/argocd/demo-app-helm.yaml`.
+6. Open `examples/argocd/whoami-applicationset.yaml`.
+7. Replace the placeholder repository URL with the real course repository or a fork.
+8. Run `kubectl apply -f module-7/examples/argocd/whoami-kustomize-dev.yaml`.
+9. Run `kubectl apply -f module-7/examples/argocd/whoami-helm.yaml`.
+10. Run `kubectl apply -f module-7/examples/argocd/demo-app-helm.yaml`.
+11. Run `kubectl get applications -n argocd`.
+12. Explain that Argo CD watches Git and renders either Kustomize or Helm before reconciling the cluster state.
+
 ## Exercises
 
 Students only do three Helm exercises in this module:
@@ -196,5 +217,6 @@ Grafana is also an example, not an exercise.
 - Keep Kustomize focused on composition and low-ceremony overrides before introducing generators or more advanced patches.
 - Introduce Helm twice: first as a way to install existing software, later as a way to package internal software.
 - Use Grafana as the instructor-led example and WordPress as the hands-on exercise so students do not repeat the same chart passively.
+- Position Argo CD after Helm and Kustomize so students see it as a delivery layer on top of those packaging choices, not as a replacement for them.
 - Mention that values keys may change slightly between chart releases, so students should inspect `helm show values` before writing overrides.
 - Keep the custom chart small enough that students can read every template in one sitting.

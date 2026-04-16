@@ -1,0 +1,27 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: whoami-helm
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/irespaldiza/kubernetes_course.git
+    targetRevision: main
+    path: module-7/examples/helm/whoami-python
+    helm:
+      values: |
+        replicaCount: 2
+        image:
+          tag: "1.0.1"
+        service:
+          type: ClusterIP
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: whoami-helm
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

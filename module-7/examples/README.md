@@ -2,6 +2,7 @@
 
 These are instructor examples used to explain packaging approaches before or alongside the Helm exercises.
 
+- `argocd/`: Argo CD `Application` and `ApplicationSet` examples that reconcile the Kustomize and Helm content from this module.
 - `kustomize/whoami-python/`: small Kustomize example with a base plus `dev` and `prod` overlays focused on simple transformations.
 - `helm/whoami-python/`: small Helm chart used to explain chart structure.
 - `helm/demo-app-starter/`: shared starting chart for the `demo-app` exercise, close to the plain manifests in `currentState/`.
@@ -17,6 +18,36 @@ The full `demo-app` reference still exists in:
 - `../solutions/helm/demo-app/`
 
 ## Suggested Commands
+
+```bash
+kubectl apply -f module-7/examples/argocd/whoami-kustomize-dev.yaml
+```
+
+Creates an Argo CD application that reconciles the `dev` Kustomize overlay from Git.
+
+```bash
+kubectl apply -f module-7/examples/argocd/whoami-helm.yaml
+```
+
+Creates an Argo CD application that renders and reconciles the small Helm chart from Git.
+
+```bash
+kubectl apply -f module-7/examples/argocd/demo-app-helm.yaml
+```
+
+Creates an Argo CD application that renders and reconciles the `demo-app` Helm solution chart from Git.
+
+```bash
+kubectl apply -f module-7/examples/argocd/whoami-applicationset.yaml
+```
+
+Creates an `ApplicationSet` that generates one Argo CD application per Kustomize environment.
+
+```bash
+kubectl get applications -n argocd
+```
+
+Lists the Argo CD applications created from the examples.
 
 ```bash
 kubectl kustomize module-7/examples/kustomize/whoami-python/base

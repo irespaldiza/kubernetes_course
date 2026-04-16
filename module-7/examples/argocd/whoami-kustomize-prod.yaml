@@ -1,0 +1,20 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: whoami-kustomize-prod
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/irespaldiza/kubernetes_course.git
+    targetRevision: main
+    path: module-7/examples/kustomize/whoami-python/overlays/prod
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: demo-app-prod
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
