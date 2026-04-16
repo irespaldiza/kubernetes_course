@@ -7,7 +7,7 @@ spec:
   project: default
   source:
     repoURL: https://github.com/irespaldiza/kubernetes_course.git
-    targetRevision: main
+    targetRevision: "4162026"
     path: module-7/examples/helm/whoami-python
     helm:
       values: |

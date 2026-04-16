@@ -7,7 +7,7 @@ spec:
   project: default
   source:
     repoURL: https://github.com/irespaldiza/kubernetes_course.git
-    targetRevision: main
+    targetRevision: "4162026"
     path: module-7/examples/kustomize/whoami-python/overlays/dev
   destination:
     server: https://kubernetes.default.svc

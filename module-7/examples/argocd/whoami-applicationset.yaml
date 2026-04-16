@@ -15,16 +15,16 @@ spec:
             path: module-7/examples/kustomize/whoami-python/overlays/prod
   template:
     metadata:
-      name: '{{name}}'
+      name: "{{name}}"
     spec:
       project: default
       source:
         repoURL: https://github.com/irespaldiza/kubernetes_course.git
-        targetRevision: main
-        path: '{{path}}'
+        targetRevision: "4162026"
+        path: "{{path}}"
       destination:
         server: https://kubernetes.default.svc
-        namespace: '{{namespace}}'
+        namespace: "{{namespace}}"
       syncPolicy:
         automated:
           prune: true
