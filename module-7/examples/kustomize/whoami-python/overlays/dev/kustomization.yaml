@@ -31,4 +31,4 @@ images:
     newTag: local
 replicas:
   - name: whoami-python
-    count: 2
+    count: 9
